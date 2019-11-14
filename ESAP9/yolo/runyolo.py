@@ -26,7 +26,7 @@ def filter_objects(inference_result, input_image_width, input_image_height):
                                "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike",
                                "person", "pottedplant", "sheep", "sofa", "train","tvmonitor"]
 
-    probability_threshold = 0.5 # TODO: The yolo algorithm gives a probability that a given object is at a specific "box". This variable is used to filter out results that yolo is not confident in. Valid numbers are between 0 and 1. If you pick a number too large, very little will be recognized, if you pick a number too small the number of false detections will increase.
+    probability_threshold = 0.05 # TODO: The yolo algorithm gives a probability that a given object is at a specific "box". This variable is used to filter out results that yolo is not confident in. Valid numbers are between 0 and 1. If you pick a number too large, very little will be recognized, if you pick a number too small the number of false detections will increase.
 
     num_classifications = len(network_classifications) # should be 20
     grid_size = 7 # the image is a 7x7 grid.  Each box in the grid is 64x64 pixels

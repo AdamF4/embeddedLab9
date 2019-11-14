@@ -116,7 +116,7 @@ def show_inference_results(image_filename, infer_labels: List[str],
 
 def process_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    (thresh, img) = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+    (thresh, img) = cv2.threshold(img, 65, 255, cv2.THRESH_BINARY)
     height, width = img.shape
     img = img[0:height, int((width / 2) - (height / 2)):int((width / 2) + (height / 2))]
     img = cv2.resize(img, (28, 28))

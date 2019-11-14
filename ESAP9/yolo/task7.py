@@ -26,7 +26,7 @@ def filter_objects(inference_result, input_image_width, input_image_height):
                                "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike",
                                "person", "pottedplant", "sheep", "sofa", "train","tvmonitor"]
 
-    probability_threshold = 0.5 # TODO: The yolo algorithm gives a probability that a given object is at a specific "box". This variable is used to filter out results that yolo is not confident in. Valid numbers are between 0 and 1. If you pick a number too large, very little will be recognized, if you pick a number too small the number of false detections will increase.
+    probability_threshold = 0.05 # TODO: The yolo algorithm gives a probability that a given object is at a specific "box". This variable is used to filter out results that yolo is not confident in. Valid numbers are between 0 and 1. If you pick a number too large, very little will be recognized, if you pick a number too small the number of false detections will increase.
 
     num_classifications = len(network_classifications) # should be 20
     grid_size = 7 # the image is a 7x7 grid.  Each box in the grid is 64x64 pixels
@@ -206,7 +206,7 @@ def display_objects_in_gui(source_image, filtered_objects):
         box_right = min(center_x + half_width, source_image_width)
         box_bottom = min(center_y + half_height, source_image_height)
 
-        print('box at index ' + str(obj_index) + ' is... left: ' + str(box_left) + ', top: ' + str(box_top) + ', right: ' + str(box_right) + ', bottom: ' + str(box_bottom))
+        #print('box at index ' + str(obj_index) + ' is... left: ' + str(box_left) + ', top: ' + str(box_top) + ', right: ' + str(box_right) + ', bottom: ' + str(box_bottom))
 
         #draw the rectangle on the image.  This is hopefully around the object
         box_color = (0, 255, 0)  # green box
@@ -229,7 +229,7 @@ def display_objects_in_gui(source_image, filtered_objects):
 def main():
     vs=VideoStream(usePiCamera=True).start()
     time.sleep(1)
-    print('Running NCS Caffe TinyYolo example')
+    # print('Running NCS Caffe TinyYolo example')
 
 
     i = 0
@@ -238,7 +238,7 @@ def main():
     mvnc.global_set_option(mvnc.GlobalOption.RW_LOG_LEVEL, 3)
     devices = mvnc.enumerate_devices()  # TODO use the mvnc API to querydevices.
     if len(devices) == 0:
-        print('No devices found')
+        #print('No devices found')
         return 1
     device = mvnc.Device(devices[0])  # TODO: use the mvnc API to assign the first device in devices to the device variable.
     device.open()
@@ -278,8 +278,9 @@ def main():
         y_ratio = float(source_image_height) / NETWORK_IMAGE_HEIGHT
         if prev_time < current_time - 0.5:
             prev_time = current_time
-
-            for obj_index in range(len(filtered_objs)):
+            print('saving images');
+            for obj_index in range(0,min(len(filtered_objs),5)):
+                print(obj_index);
                 center_x = int(filtered_objs[obj_index][1] * x_ratio)
                 center_y = int(filtered_objs[obj_index][2] * y_ratio)
                 half_width = int(filtered_objs[obj_index][3] * x_ratio)//2
@@ -291,11 +292,10 @@ def main():
                 box_right = min(center_x + half_width, source_image_width)
                 box_bottom = min(center_y + half_height, source_image_height)
                 image = display_image[box_top:box_bottom, box_left:box_right]
-                cv2.imwrite('task7_images/'+str(i)+'.jpg', image)
-                i += 1
+                cv2.imwrite('task7_images/'+str(obj_index)+'.jpg', image)
 
-        print('Displaying image with objects detected in GUI')
-        print('Click in the GUI window and hit any key to exit')
+        # print('Displaying image with objects detected in GUI')
+        # print('Click in the GUI window and hit any key to exit')
         #display the filtered objects/boxes in a GUI window
         display_objects_in_gui(display_image, filtered_objs)
 

@@ -208,10 +208,7 @@ def main():
             prev_time = current_time
             for file in os.listdir("task7_images"):
                 if file.endswith(".jpg"):
-                    i = int(file.replace('.jpg', ''))
-                    if i > last_image:
-                        prediction(os.path.join("task7_images/", file))
-                        last_image = max(i, last_image)
+                    prediction(os.path.join("task7_images/", file))
 
 
 def prediction(fileName):
@@ -253,28 +250,13 @@ def prediction(fileName):
         # sqz_class = np.argmax(sqznet_results)
         # print(
         #     "\nclass: [%d] '%s' with %5.2f%% confidence" % (sqz_class, classes[sqz_class], sqznet_results[sqz_class] * 100))
-        sqz_class_list = max5(sqznet_results)
-        for sqz_class in sqz_class_list:
-            one_prediction = '  certainty ' + str(sqznet_results[sqz_class]) + ' --> ' + "'" + classes[sqz_class] + "'"
-            print(one_prediction)
+        sqz_class = np.argmax(sqznet_results)
+        one_prediction = '  certainty ' + str(sqznet_results[sqz_class]) + ' --> ' + "'" + classes[sqz_class] + "'"
+        print(one_prediction)
 
         print('-----------------------------------------------------------')
 
 
-def max5(list1):
-    final_list = []
-
-    for i in range(0, 5):
-        max1 = 0
-
-        for j in range(len(list1)):
-            if list1[j] > max1:
-                max1 = list1[j];
-
-        list1.remove(max1);
-        final_list.append(max1)
-
-    return final_list
 
 
 if __name__ == '__main__':
