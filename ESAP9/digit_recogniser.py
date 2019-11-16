@@ -4,23 +4,22 @@
 # License: MIT See LICENSE file in root directory.
 
 
-
 import numpy
 import cv2
 import os
 import sys
-#import mvnc as mvnc
+# import mvnc as mvnc
 import time
 from mvnc import mvncapi as mvnc
 
+from imutils.video import VideoStream
 
 from typing import List
 
-
 NETWORK_IMAGE_DIMENSIONS = (28, 28)
 
-def do_initialize():
 
+def do_initialize():
     # Set logging level to only log errors
 
     mvnc.global_set_option(mvnc.GlobalOption.RW_LOG_LEVEL, 3)
@@ -34,18 +33,18 @@ def do_initialize():
     graph_filename = "inference.graph"
 
     # Load graph file
-    try :
+    try:
         with open(graph_filename, mode='rb') as f:
             in_memory_graph = f.read()
-    except :
-        print ("Error reading graph file: " + graph_filename)
+    except:
+        print("Error reading graph file: " + graph_filename)
     graph = mvnc.Graph("mnist graph")
     fifo_in, fifo_out = graph.allocate_with_fifos(device, in_memory_graph)
 
-    return device, graph, fifo_in,fifo_out
+    return device, graph, fifo_in, fifo_out
 
 
-def do_inference(fifo_in,fifo_out,graph, image_for_inference, number_results):
+def do_inference(fifo_in, fifo_out, graph, image_for_inference, number_results):
     """ executes one inference which will determine the top classifications for an image file.
 
     Parameters
@@ -66,7 +65,7 @@ def do_inference(fifo_in,fifo_out,graph, image_for_inference, number_results):
     """
 
     # text labels for each of the possible classfications
-    labels=[ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
     # Load tensor and get result.  This executes the inference on the NCS
     graph.queue_inference_with_fifo_elem(fifo_in, fifo_out, image_for_inference.astype(numpy.float32), None)
@@ -107,23 +106,23 @@ def do_cleanup(device: mvnc.Device, graph: mvnc.Graph) -> None:
 
 def show_inference_results(image_filename, infer_labels: List[str],
                            infer_probabilities: List[numpy.float16]) -> None:
-
     num_results = len(infer_labels)
     for index in range(0, num_results):
-        one_prediction = '  certainty ' + str(infer_probabilities[index]) + ' --> ' + "'" + infer_labels[index]+ "'"
+        one_prediction = '  certainty ' + str(infer_probabilities[index]) + ' --> ' + "'" + infer_labels[index] + "'"
         print(one_prediction)
 
     print('-----------------------------------------------------------')
-from imutils.video import VideoStream
+
 
 def process_image(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     (thresh, img) = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
     height, width = img.shape
-    img = img[0:height, int((width/2)-(height/2)):int((width/2)+(height/2))]
-    img = cv2.resize(img, (28, 28), interpolation=cv2.INTER_AREA)
+    img = img[0:height, int((width / 2) - (height / 2)):int((width / 2) + (height / 2))]
+    img = cv2.resize(img, (28, 28))
     img = cv2.bitwise_not(img)
     return img
+
 
 def main():
     """ Main function, return an int for program return value
@@ -131,31 +130,33 @@ def main():
     Opens device, reads graph file, runs inferences on files in digit_images
     subdirectory, prints results, closes device
     """
-    vs=VideoStream(usePiCamera=True).start()
+    vs = VideoStream(usePiCamera=True).start()
     time.sleep(1)
 
     # initialize the neural compute device via the NCAPI v 2
-    device, graph,fifo_in,fifo_out = do_initialize()
+    device, graph, fifo_in, fifo_out = do_initialize()
 
-    if (device == None or graph == None):
-        print ("Could not initialize device.")
+    if device is None or graph is None:
+        print("Could not initialize device.")
         quit(1)
 
-    while(True):
-        frame=vs.read()
-        image_for_inference=frame.copy()
+    while True:
+        frame = vs.read()
+        image_for_inference = frame.copy()
 
         # image_for_inference = cv2.cvtColor(image_for_inference, cv2.COLOR_BGR2GRAY)
 
         # image_for_display=image_for_inference
 
-        image_for_display=cv2.resize(image_for_inference, (200, 200))
-        process_image(image_for_inference)
+        image_for_display = cv2.resize(image_for_inference, (200, 200))
+        image_for_inference = process_image(image_for_inference)
 
         # image_for_inference=cv2.resize(image_for_inference, NETWORK_IMAGE_DIMENSIONS)
         # image_for_inference = image_for_inference.astype(numpy.float32)
         # image_for_inference[:] = ((image_for_inference[:] )*(1.0/255.0))
         cv2.imshow("mnist", image_for_display)
+        cv2.imshow("inference", image_for_inference)
+        cv2.imshow("big", cv2.resize(image_for_inference, (200, 200)))
         cv2.waitKey(1)
         time.sleep(.25)
         infer_labels, infer_probabilities = do_inference(fifo_in, fifo_out, graph, image_for_inference, 5)
@@ -167,4 +168,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

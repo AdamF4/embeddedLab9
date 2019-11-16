@@ -6,9 +6,8 @@ import numpy as np
 import scipy.io
 import time
 import sys
-import csv
 from PIL import Image
-
+import os
 
 def imread_resize(path):
     img_orig = scipy.misc.imread(path)
@@ -30,7 +29,6 @@ def get_dtype_np():
 
 def get_dtype_tf():
     return tf.float32
-
 
 # SqueezeNet v1.1 (signature pool 1/3/5)
 ########################################
@@ -190,42 +188,42 @@ def _pool_layer(net, name, input, pooling, size=(2, 2), stride=(3, 3), padding='
     return x
 
 
+def newImages():
+    prev_time = 0
+    while True:
+        current_time = time.time()
+        if prev_time < current_time - 0.5:
+            prev_time = current_time
+            for file in os.listdir():
+                if file.endswith(".jpg"):
+                    print(os.path.join("", file))
+
+
 def main():
-    file_names = []
-    class_labels = []
-    with open('annotations.txt') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            # print(','.join(row))
-            file_names.append(row[1])
-            class_labels.append(row[0])
-
-    # print(file_names)
-    # print(class_labels)
-    length = len(file_names)
-    incorrect = 0
-    i = 0
-    while i < length:
-        predicted = prediction(file_names[i])
-        
-        if not(class_labels[i] in predicted):
-            print("Failure!: prediction: '%s' is not equal to actual: '%s' for '%s'" % (
-                predicted, class_labels[i], file_names[i]))
-            incorrect += 1
-        else:
-            print("Success!: prediction: '%s' is equal to actual: '%s' for '%s'" % (
-                predicted, class_labels[i], file_names[i]))
-        i += 1
-    print("Total number of incorrect predictions is: [%d]" % incorrect)
+    prev_time = 0
+    last_image = 0
+    while True:
+        current_time = time.time()
+        if prev_time < current_time - 2:
+            prev_time = current_time
+            for file in os.listdir("task7_images"):
+                if file.endswith(".jpg"):
+                    i = int(file.replace('.jpg', ''))
+                    if i > last_image:
+                        prediction(os.path.join("task7_images/", file))
+                        last_image = max(i, last_image)
 
 
-def prediction(fileName):  # def main():
-    # imgname=sys.argv[1]
+def prediction(fileName):
     imgname = fileName
+
     # Loading image
     img_content, orig_shape = imread_resize(imgname)
     img_content_shape = (1,) + img_content.shape
 
+    # remove the file
+    # os.remove(fileName)
+    
     # Loading ImageNet classes info
     classes = []
     with open('synset_words.txt', 'r') as classes_file:
@@ -249,15 +247,34 @@ def prediction(fileName):  # def main():
 
         # Classifying
         sqznet_results = \
-            sqznet['classifier_actv'].eval(feed_dict={image: [preprocess(img_content, sqz_mean)], keep_prob: 1.})[0][0][
-                0]
+            sqznet['classifier_actv'].eval(feed_dict={image: [preprocess(img_content, sqz_mean)], keep_prob: 1.})[0][0][0]
 
         # Outputting result
-        sqz_class = np.argmax(sqznet_results)
-        print(
-            "\nclass: [%d] '%s' with %5.2f%% confidence" % (
-                sqz_class, classes[sqz_class], sqznet_results[sqz_class] * 100))
-        return classes[sqz_class]
+        # sqz_class = np.argmax(sqznet_results)
+        # print(
+        #     "\nclass: [%d] '%s' with %5.2f%% confidence" % (sqz_class, classes[sqz_class], sqznet_results[sqz_class] * 100))
+        sqz_class_list = max5(sqznet_results)
+        for sqz_class in sqz_class_list:
+            one_prediction = '  certainty ' + str(sqznet_results[sqz_class]) + ' --> ' + "'" + classes[sqz_class] + "'"
+            print(one_prediction)
+
+        print('-----------------------------------------------------------')
+
+
+def max5(list1):
+    final_list = []
+
+    for i in range(0, 5):
+        max1 = 0
+
+        for j in range(len(list1)):
+            if list1[j] > max1:
+                max1 = list1[j];
+
+        list1.remove(max1);
+        final_list.append(max1)
+
+    return final_list
 
 
 if __name__ == '__main__':

@@ -231,6 +231,9 @@ def main():
     time.sleep(1)
     print('Running NCS Caffe TinyYolo example')
 
+
+    i = 0
+
     # Set logging level to only log errors
     mvnc.global_set_option(mvnc.GlobalOption.RW_LOG_LEVEL, 3)
     devices = mvnc.enumerate_devices()  # TODO use the mvnc API to querydevices.
@@ -270,11 +273,11 @@ def main():
         current_time = time.time()
         if prev_time < current_time - 0.5:
             prev_time = current_time
-            i = 0
-            length = len(filtered_objs)
-            while i < length:
-                cv2.imwrite('task7_images/'+str(i)+'.jpg', filtered_objs[i])
+
+            for image in filtered_objs:
+                cv2.imwrite('task7_images/'+str(i)+'.jpg', image)
                 i += 1
+
         print('Displaying image with objects detected in GUI')
         print('Click in the GUI window and hit any key to exit')
         #display the filtered objects/boxes in a GUI window

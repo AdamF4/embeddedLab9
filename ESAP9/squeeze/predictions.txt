@@ -1,0 +1,14 @@
+potato.jpg 
+class: [930] 'n07684084 French loaf' with 47.78% confidence
+
+rabbit.jpg
+class: [332] 'n02328150 Angora, Angora rabbit' with 67.92% confidence
+
+polly.jpg
+class: [88] 'n01818515 macaw' with 100.00% confidence
+
+pupper.jpg
+class: [852] 'n04409515 tennis ball' with 48.65% confidence
+
+kitty.jpg
+class: [278] 'n02119789 kit fox, Vulpes macrotis' with 40.89% confidence
