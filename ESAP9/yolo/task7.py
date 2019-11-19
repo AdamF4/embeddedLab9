@@ -271,10 +271,26 @@ def main():
         # filter out all the objects/boxes that don't meet thresholds
         filtered_objs = filter_objects(output.astype(np.float32), input_image.shape[1], input_image.shape[0])
         current_time = time.time()
+        source_image_width = display_image.shape[1]
+        source_image_height = display_image.shape[0]
+
+        x_ratio = float(source_image_width) / NETWORK_IMAGE_WIDTH
+        y_ratio = float(source_image_height) / NETWORK_IMAGE_HEIGHT
         if prev_time < current_time - 0.5:
             prev_time = current_time
 
-            for image in filtered_objs:
+            for obj_index in range(len(filtered_objs)):
+                center_x = int(filtered_objs[obj_index][1] * x_ratio)
+                center_y = int(filtered_objs[obj_index][2] * y_ratio)
+                half_width = int(filtered_objs[obj_index][3] * x_ratio)//2
+                half_height = int(filtered_objs[obj_index][4] * y_ratio)//2
+
+                # calculate box (left, top) and (right, bottom) coordinates
+                box_left = max(center_x - half_width, 0)
+                box_top = max(center_y - half_height, 0)
+                box_right = min(center_x + half_width, source_image_width)
+                box_bottom = min(center_y + half_height, source_image_height)
+                image = display_image[box_top:box_bottom, box_left:box_right]
                 cv2.imwrite('task7_images/'+str(i)+'.jpg', image)
                 i += 1
 

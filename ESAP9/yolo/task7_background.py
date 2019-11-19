@@ -223,7 +223,7 @@ def prediction(fileName):
 
     # remove the file
     # os.remove(fileName)
-    
+
     # Loading ImageNet classes info
     classes = []
     with open('synset_words.txt', 'r') as classes_file:
